@@ -1,13 +1,21 @@
-FROM bde2020/spark-base:3.0.0-hadoop3.2
+FROM bde2020/spark-master:3.0.0-hadoop3.2
 
-LABEL maintainer="Gezim Sejdiu <g.sejdiu@gmail.com>, Giannis Mouchakis <gmouchakis@gmail.com>"
+#apt update and install kits
+RUN apk update && apk add --no-cache \
+    openjdk8 \
+    net-tools \
+    curl \
+    netcat-openbsd \
+    gnupg \
+    snappy-dev \
+    tzdata \
+    iputils \
+    busybox-extras \
+    procps \
+    vim
+# Set timezone to Oslo
+RUN ln -sf /usr/share/zoneinfo/Europe/Oslo /etc/localtime && \
+    echo "Europe/Oslo" > /etc/timezone
+RUN wget -P /spark/jars/ https://repo1.maven.org/maven2/com/zaxxer/HikariCP/5.0.1/HikariCP-5.0.1.jar
+RUN wget -P /spark/jars/ https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar
 
-COPY master.sh /
-
-ENV SPARK_MASTER_PORT 7077
-ENV SPARK_MASTER_WEBUI_PORT 8080
-ENV SPARK_MASTER_LOG /spark/logs
-
-EXPOSE 8080 7077 6066
-
-CMD ["/bin/bash", "/master.sh"]

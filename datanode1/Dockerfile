@@ -27,17 +27,9 @@ HEALTHCHECK CMD curl -f http://localhost:9864/ || exit 1
 ENV HDFS_CONF_dfs_datanode_data_dir=file:///hadoop/dfs/data
 RUN mkdir -p /hadoop/dfs/data
 VOLUME /hadoop/dfs/data
-ENV HDFS_CONF_dfs_datanode_data_dir=file:///hadoop/dfs/data
-ENV HDFS_CONF_dfs_datanode_hostname=localhost
-ENV HDFS_CONF_dfs_datanode_use_datanode_hostname=true
-ENV HDFS_CONF_dfs_client_use_datanode_hostname=true
-ENV HDFS_CONF_dfs_datanode_address=0.0.0.0:9866
-ENV HDFS_CONF_dfs_datanode_http_address=0.0.0.0:9864
-ENV HDFS_CONF_dfs_datanode_ipc_address=0.0.0.0:9867
 
 
 
-
-EXPOSE 9864 9866 9867
+EXPOSE 9864
 
 
