@@ -1,2 +1,4 @@
 # Ignore Terraform directories and files
 .test_data/
+/test_data
+mini.json
