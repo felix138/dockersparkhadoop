@@ -12,22 +12,18 @@ services:
       - 9870:9870
       - 9000:9000
     volumes:
-      #- hadoop_namenode:/hadoop/dfs/name
-      - /c/root/data/namenode:/hadoop/dfs/data #mounting C:\root\data to /hadoop/data in the container
+      - hadoop_namenode:/hadoop/dfs/name
+      - /c/root/data/namenode:/hadoop/data #mounting C:\root\data to /hadoop/data in the container
     environment:
       - CLUSTER_NAME=test
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-      - HDFS_CONF_dfs_replication=3
       #- CLASSPATH=/opt/hadoop-3.2.1/etc/hadoop:/opt/hadoop-3.2.1/share/hadoop/common/lib/*:/opt/hadoop-3.2.1/share/hadoop/common/*:/opt/hadoop-3.2.1/share/hadoop/hdfs:/opt/hadoop-3.2.1/share/hadoop/hdfs/lib/*:/opt/hadoop-3.2.1/share/hadoop/hdfs/*
       #- HDFS_CONF_dfs_namenode_name_dir=file:///hadoop/dfs/name
       #- FORMAT_NAMENODE=true
-    #command: ["sh", "-c", "hdfs namenode -format -force && hdfs namenode"]
-    
     env_file:
       - ./hadoop.env
 
   datanode:
-    user: root
     build: 
       context: .
       dockerfile: ./datanode/Dockerfile
@@ -37,13 +33,12 @@ services:
       docker-hadoop-spark_default:
         ipv4_address: 172.19.0.4
     volumes:
-      - /c/root/data/datanode:/hadoop/dfs/data
+      - /c/root/data/datanode/dfs:/hadoop/dfs/data
       #- hadoop_datanode:/hadoop/dfs/data
       #- /c/root/data/datanode:/hadoop/data #mounting C:\root\data to /hadoop/data in the container
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
-      
     ports:
       - "9964:9864"
       - "9966:9866"
@@ -51,7 +46,6 @@ services:
       - ./hadoop.env
       
   datanode1:
-    user: root
     build: 
       context: .
       dockerfile: ./datanode/Dockerfile
@@ -61,7 +55,7 @@ services:
       docker-hadoop-spark_default:
         ipv4_address: 172.19.0.20
     volumes:
-      - /c/root/data/datanode1:/hadoop/dfs/data
+      - /c/root/data/datanode1/dfs:/hadoop/dfs/data
       #- hadoop_datanode1:/hadoop/dfs/data
       #- /c/root/data/datanode1:/hadoop/data #mounting C:\root\data to /hadoop/data in the container
     environment:
@@ -74,7 +68,6 @@ services:
       - ./hadoop.env
 
   datanode2:
-    user: root
     build: 
       context: .
       dockerfile: ./datanode/Dockerfile
@@ -84,7 +77,7 @@ services:
       docker-hadoop-spark_default:
         ipv4_address: 172.19.0.21
     volumes:
-      - /c/root/data/datanode2:/hadoop/dfs/data
+      - /c/root/data/datanode2/dfs:/hadoop/dfs/data
       #- hadoop_datanode2:/hadoop/dfs/data
       #- /c/root/data/datanode2:/hadoop/data #mounting C:\root\data to /hadoop/data in the container
     environment:
@@ -104,10 +97,7 @@ services:
       docker-hadoop-spark_default:
         ipv4_address: 172.19.0.3
     environment:
-      #SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 datanode1:9864 datanode2:9864"
-      - YARN_CONF_yarn_resourcemanager_fs_state-store_uri=hdfs://namenode:9000/tmp/yarn/system
-      - YARN_CONF_yarn_resourcemanager_store_class=org.apache.hadoop.yarn.server.resourcemanager.recovery.FileSystemRMStateStore
-      
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 datanode1:9864 datanode2:9864"
     env_file:
       - ./hadoop.env
 
@@ -157,24 +147,24 @@ services:
   spark-worker-1:
     image: bde2020/spark-worker:3.0.0-hadoop3.2
     container_name: spark-worker-1
-   #command: >
-   #  sh -c "
-   #  apk add --no-cache netcat-openbsd curl &&
-   #  mkdir -p /opt/hadoop/etc/hadoop &&
-   #  echo '<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-   #  <?xml-stylesheet type=\"text/xsl\" href=\"configuration.xsl\"?>
-   #  <configuration>
-   #      <property>
-   #          <name>fs.defaultFS</name>
-   #          <value>hdfs://namenode:9000</value>
-   #      </property>
-   #  </configuration>' > /opt/hadoop/etc/hadoop/core-site.xml &&
-   #  echo 'Testing connection to namenode...' &&
-   #  nc -zv 172.19.0.5 9000 &&
-   #  echo 'Configuration complete, starting Spark worker...' &&
-   # 
-   #  /bin/bash /worker.sh 
-   #  "
+    command: >
+      sh -c "
+      apk add --no-cache netcat-openbsd curl &&
+      mkdir -p /opt/hadoop/etc/hadoop &&
+      echo '<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+      <?xml-stylesheet type=\"text/xsl\" href=\"configuration.xsl\"?>
+      <configuration>
+          <property>
+              <name>fs.defaultFS</name>
+              <value>hdfs://namenode:9000</value>
+          </property>
+      </configuration>' > /opt/hadoop/etc/hadoop/core-site.xml &&
+      echo 'Testing connection to namenode...' &&
+      nc -zv 172.19.0.5 9000 &&
+      echo 'Configuration complete, starting Spark worker...' &&
+     
+      /bin/bash /worker.sh 
+      "
     networks:
       docker-hadoop-spark_default:
         ipv4_address: 172.19.0.12
@@ -264,7 +254,6 @@ volumes:
   
 networks:
   docker-hadoop-spark_default:
-    name: docker-hadoop-spark_default
     driver: bridge
     ipam:
       config:

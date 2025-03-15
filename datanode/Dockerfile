@@ -35,9 +35,13 @@ ENV HDFS_CONF_dfs_datanode_address=0.0.0.0:9866
 ENV HDFS_CONF_dfs_datanode_http_address=0.0.0.0:9864
 ENV HDFS_CONF_dfs_datanode_ipc_address=0.0.0.0:9867
 
+ADD datanode/run.sh /run.sh
+RUN chmod a+x /run.sh
+# 在Dockerfile末尾添加
 
 
 
 EXPOSE 9864 9866 9867
-
+CMD ["/run.sh"]
+RUN chmod -R 777 /hadoop/dfs/data
 

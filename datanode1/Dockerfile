@@ -28,8 +28,16 @@ ENV HDFS_CONF_dfs_datanode_data_dir=file:///hadoop/dfs/data
 RUN mkdir -p /hadoop/dfs/data
 VOLUME /hadoop/dfs/data
 
+ADD datanode/run.sh /run.sh
+RUN chmod a+x /run.sh
+
+# 在Dockerfile末尾添加
+RUN chmod -R 777 /hadoop/dfs/data
+
+EXPOSE 9864 9866 9867
+CMD ["/run.sh"]
 
 
-EXPOSE 9864
+
 
 

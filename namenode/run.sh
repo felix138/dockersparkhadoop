@@ -18,5 +18,5 @@ if [ "`ls -A $namedir`" == "" ]; then
   echo "Formatting namenode name directory: $namedir"
   $HADOOP_HOME/bin/hdfs --config $HADOOP_CONF_DIR namenode -format $CLUSTER_NAME
 fi
-
+format
 $HADOOP_HOME/bin/hdfs --config $HADOOP_CONF_DIR namenode
